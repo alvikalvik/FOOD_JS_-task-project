@@ -1,4 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
+
+    //Tabs
     const tabsParent = document.querySelector('.tabheader__items');
     const tabs = tabsParent.querySelectorAll('.tabheader__item');
     const tabContents = document.querySelectorAll('.tabcontent');
@@ -33,10 +35,25 @@ window.addEventListener('DOMContentLoaded', () => {
                     showTab(i);
                 }
             });
-        }
-
-        
+        }        
     });
+
+    //Timer
+    const deadline = '2021-02-14T02:00';
+
+    function calculateTime(endtime) { 
+        const t = new Date(endtime) - new Date();
+
+        const seconds = Math.floor( (t / 1000) % 60);
+        const minutes = Math.floor( (t / 1000 /60) % 60);
+        const hours =   Math.floor( (t / 1000 / 60 / 60) % 24);
+        const days =    Math.floor( (t / 1000 / 60 / 60 / 24));
+
+        return {total: t, seconds, minutes, hours, days};
+        
+    }
+
+    console.log(calculateTime(deadline));
 
 
 
