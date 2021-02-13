@@ -47,22 +47,6 @@ a {
   font-size: 36px;
   font-weight: 400; }
 
-.show {
-  display: block; }
-
-.hide {
-  display: none; }
-
-.fade {
-  animation-name: fade;
-  animation-duration: 1s; }
-
-@keyframes fade {
-  from {
-    opacity: 0.1; }
-  to {
-    opacity: 1; } }
-
 .header {
   display: flex;
   justify-content: space-between;
@@ -531,3 +515,19 @@ a {
     display: block;
     width: 280px;
     margin: 0 auto; }
+
+.show {
+  display: block; }
+
+.hide {
+  display: none; }
+
+.fade {
+  animation-name: fade;
+  animation-duration: 1s; }
+
+@keyframes fade {
+  from {
+    opacity: 0.1; }
+  to {
+    opacity: 1; } }

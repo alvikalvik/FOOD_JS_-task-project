@@ -97,9 +97,70 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     runTimer('.timer', deadline);
+
+    //Modal    
+    function runModal(modalSelector, dataModal, dataModalClose) {
+        const modal = document.querySelector(modalSelector);        
+        const modalTriggers = document.querySelectorAll(`[${dataModal}]`);
+        const modalClose = modal.querySelector(`[${dataModalClose}]`);
+        let isModalViewed = false;         
+
+        function showModal() {
+            isModalViewed = true;
+            modal.classList.add('show', 'fade');
+            modal.classList.remove('hide');
+            document.body.style.overflow = 'hidden';
+            document.addEventListener('keydown', function escapeModal(evt) {
+                if (evt.code === 'Escape') {                    
+                    closeModal();
+                    document.removeEventListener('keydown', escapeModal);
+                }
+            });
+        }
     
+        function closeModal() {
+            modal.classList.remove('show', 'fade');
+            modal.classList.add('hide');
+            document.body.style.overflow = '';
+        }
+        
+        for (const trigger of modalTriggers) {
+            trigger.addEventListener('click', showModal);            
+        }
 
+        modalClose.addEventListener('click', closeModal);  
 
+        modal.addEventListener('click', evt => {
+            if (evt.target === modal) {
+                closeModal();
+            }
+        });
+
+        const modalTimerId = setTimeout(() => {
+            if (!isModalViewed) {
+                showModal();                
+                clearInterval(modalTimerId);
+            }
+        }, 20000);        
+
+        window.addEventListener('scroll', function endScrollModal() {
+            const scrollHeight = Math.max(
+                document.body.scrollHeight, document.documentElement.scrollHeight,
+                document.body.offsetHeight, document.documentElement.offsetHeight,
+                document.body.clientHeight, document.documentElement.clientHeight
+            );
+            const scrollButtom = window.pageYOffset + document.documentElement.clientHeight;
+
+            if(scrollButtom >= scrollHeight - 20) {
+                if (!isModalViewed) {
+                    showModal();
+                }                
+                window.removeEventListener('scroll', endScrollModal);
+            }
+        });     
+    }
+    
+    runModal('.modal', 'data-modal', 'data-modal-close');
 
 
 });
