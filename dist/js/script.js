@@ -131,7 +131,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }); //Timer
 
-  const deadline = '2021-02-14T02:00';
+  const deadline = '2021-02-14T12:13';
 
   function calculateTime(endtime) {
     const t = new Date(endtime) - new Date();
@@ -148,7 +148,47 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  console.log(calculateTime(deadline));
+  function fixZero(num) {
+    if (num < 10 && num >= 0) {
+      return `0${num}`;
+    } else {
+      return num;
+    }
+  }
+
+  function runTimer(timerSelector, endtime) {
+    function updateTimer(timerSelector, endtime) {
+      const timer = document.querySelector(timerSelector);
+      const days = timer.querySelector(`${timerSelector}__days`);
+      const hours = timer.querySelector(`${timerSelector}__hours`);
+      const minutes = timer.querySelector(`${timerSelector}__minutes`);
+      const seconds = timer.querySelector(`${timerSelector}__seconds`);
+      const currentTime = calculateTime(endtime);
+
+      if (currentTime.total >= 0) {
+        days.textContent = fixZero(currentTime.days);
+        hours.textContent = fixZero(currentTime.hours);
+        minutes.textContent = fixZero(currentTime.minutes);
+        seconds.textContent = fixZero(currentTime.seconds);
+      } else {
+        days.textContent = '00';
+        hours.textContent = '00';
+        minutes.textContent = '00';
+        seconds.textContent = '00';
+      }
+    }
+
+    updateTimer(timerSelector, endtime);
+    const intervalId = setInterval(function ticktock() {
+      updateTimer(timerSelector, endtime);
+
+      if (calculateTime(endtime).total <= 0) {
+        clearInterval(intervalId); // console.log('Interval cleared');
+      }
+    }, 1000);
+  }
+
+  runTimer('.timer', deadline);
 });
 
 /***/ })
