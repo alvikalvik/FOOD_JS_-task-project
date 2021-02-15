@@ -81,3 +81,18 @@
         opacity: 1;
     }
 }
+
+.spinner {
+    display: block;
+    margin: 0 auto;
+}
+
+.message {
+    display: block;
+    margin-top: 15px;
+    border: 2px solid $primary;
+    min-height: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;    
+}

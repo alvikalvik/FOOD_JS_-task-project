@@ -531,3 +531,16 @@ a {
     opacity: 0.1; }
   to {
     opacity: 1; } }
+
+.spinner {
+  display: block;
+  margin: 0 auto; }
+
+.message {
+  display: block;
+  margin-top: 15px;
+  border: 2px solid #54ED39;
+  min-height: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center; }

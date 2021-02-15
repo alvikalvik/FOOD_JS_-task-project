@@ -101,12 +101,10 @@ window.addEventListener('DOMContentLoaded', () => {
     //Modal    
     function runModal(modalSelector, dataModal, dataModalClose) {
         const modal = document.querySelector(modalSelector);        
-        const modalTriggers = document.querySelectorAll(`[${dataModal}]`);
-        const modalClose = modal.querySelector(`[${dataModalClose}]`);
+        const modalTriggers = document.querySelectorAll(`[${dataModal}]`);        
         let isModalViewed = false;         
 
-        function showModal() {
-            isModalViewed = true;
+        function showModal() {            
             modal.classList.add('show', 'fade');
             modal.classList.remove('hide');
             document.body.style.overflow = 'hidden';
@@ -116,6 +114,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     document.removeEventListener('keydown', escapeModal);
                 }
             });
+            isModalViewed = true;
         }
     
         function closeModal() {
@@ -126,22 +125,20 @@ window.addEventListener('DOMContentLoaded', () => {
         
         for (const trigger of modalTriggers) {
             trigger.addEventListener('click', showModal);            
-        }
-
-        modalClose.addEventListener('click', closeModal);  
+        }        
 
         modal.addEventListener('click', evt => {
-            if (evt.target === modal) {
+            if (evt.target && (evt.target === modal || evt.target.matches(`[${dataModalClose}]`))) {
                 closeModal();
             }
         });
 
-        //AutoShow modal after 10 sec
-        // setTimeout(() => {
-        //     if (!isModalViewed) {
-        //         showModal();        
-        //     }
-        // }, 10000);        
+        //AutoShow modal after 50 sec
+        setTimeout(() => {
+            if (!isModalViewed) {
+                showModal();        
+            }
+        }, 50000);        
 
         window.addEventListener('scroll', function endScrollModal() {
             const scrollHeight = Math.max(
@@ -177,7 +174,6 @@ window.addEventListener('DOMContentLoaded', () => {
             this.priceUAH = 0;
 
             this.changeToUAH();
-
         }
 
         changeToUAH() {
@@ -238,6 +234,63 @@ window.addEventListener('DOMContentLoaded', () => {
         14,
         `menu__item`
     ).render();
+
+    //Form
+    const forms = document.querySelectorAll('form');
+
+    const formMessages = {
+        loading: 'img/form/spinner.svg',
+        success: 'Спасибо. Скоро мы с Вами свяжемся.',
+        error: 'Ошибка отправки запроса.',
+    };
+
+    for (const form of forms) {
+        sendForm(form);
+    }
+
+    function sendForm(form) {
+        form.addEventListener('submit', evt => {
+            evt.preventDefault();
+            
+            const formData = new FormData(form);
+            const xhr = new XMLHttpRequest();
+            const messageBox = document.createElement('div');
+            const spinner = document.createElement('img');
+
+            const object = {};
+            formData.forEach((value, key) => object[key] = value);
+            const json = JSON.stringify(object);
+
+            messageBox.classList.add('message');            
+            
+            xhr.open('POST', 'server.php');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(json);
+            // xhr.send(formData);  // if formData needed instead of JSON          
+            
+            spinner.src = formMessages.loading;
+            spinner.classList.add('spinner');
+            form.querySelector('.btn').append(spinner);
+
+            xhr.onload = function() {                
+                if (xhr.status != 200) {
+                    messageBox.textContent = formMessages.error;                    
+                    console.log(`Ошибка ${xhr.status}: ${xhr.statusText}`);
+                } else {
+                    messageBox.textContent = formMessages.success;                    
+                    console.log(xhr.response);
+                    form.reset();
+                }
+                spinner.remove();
+                form.insertAdjacentElement('afterend', messageBox);
+                setInterval(() => {
+                    messageBox.remove();
+                },3000);
+              };
+        });
+    }
+
+
 
 
 

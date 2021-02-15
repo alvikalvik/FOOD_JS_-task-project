@@ -193,11 +193,9 @@ window.addEventListener('DOMContentLoaded', () => {
   function runModal(modalSelector, dataModal, dataModalClose) {
     const modal = document.querySelector(modalSelector);
     const modalTriggers = document.querySelectorAll(`[${dataModal}]`);
-    const modalClose = modal.querySelector(`[${dataModalClose}]`);
     let isModalViewed = false;
 
     function showModal() {
-      isModalViewed = true;
       modal.classList.add('show', 'fade');
       modal.classList.remove('hide');
       document.body.style.overflow = 'hidden';
@@ -207,6 +205,7 @@ window.addEventListener('DOMContentLoaded', () => {
           document.removeEventListener('keydown', escapeModal);
         }
       });
+      isModalViewed = true;
     }
 
     function closeModal() {
@@ -219,18 +218,17 @@ window.addEventListener('DOMContentLoaded', () => {
       trigger.addEventListener('click', showModal);
     }
 
-    modalClose.addEventListener('click', closeModal);
     modal.addEventListener('click', evt => {
-      if (evt.target === modal) {
+      if (evt.target && (evt.target === modal || evt.target.matches(`[${dataModalClose}]`))) {
         closeModal();
       }
-    }); //AutoShow modal after 10 sec
-    // setTimeout(() => {
-    //     if (!isModalViewed) {
-    //         showModal();        
-    //     }
-    // }, 10000);        
+    }); //AutoShow modal after 50 sec
 
+    setTimeout(() => {
+      if (!isModalViewed) {
+        showModal();
+      }
+    }, 50000);
     window.addEventListener('scroll', function endScrollModal() {
       const scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight);
       const scrollButtom = window.pageYOffset + document.documentElement.clientHeight;
@@ -293,7 +291,56 @@ window.addEventListener('DOMContentLoaded', () => {
 
   new MenuCard(`.menu .container`, `img/tabs/vegy.jpg`, `vegy`, `Меню "Фитнес"`, `Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!`, 9, `menu__item`).render();
   new MenuCard(`.menu .container`, `img/tabs/elite.jpg`, `elite`, `Меню “Премиум”`, `В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!`, 19, `menu__item`).render();
-  new MenuCard(`.menu .container`, `img/tabs/post.jpg`, `post`, `Меню "Постное"`, `Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.`, 14, `menu__item`).render();
+  new MenuCard(`.menu .container`, `img/tabs/post.jpg`, `post`, `Меню "Постное"`, `Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.`, 14, `menu__item`).render(); //Form
+
+  const forms = document.querySelectorAll('form');
+  const formMessages = {
+    loading: 'img/form/spinner.svg',
+    success: 'Спасибо. Скоро мы с Вами свяжемся.',
+    error: 'Ошибка отправки запроса.'
+  };
+
+  for (const form of forms) {
+    sendForm(form);
+  }
+
+  function sendForm(form) {
+    form.addEventListener('submit', evt => {
+      evt.preventDefault();
+      const formData = new FormData(form);
+      const xhr = new XMLHttpRequest();
+      const messageBox = document.createElement('div');
+      const spinner = document.createElement('img');
+      const object = {};
+      formData.forEach((value, key) => object[key] = value);
+      const json = JSON.stringify(object);
+      messageBox.classList.add('message');
+      xhr.open('POST', 'server.php');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(json); // xhr.send(formData);  // if formData needed instead of JSON          
+
+      spinner.src = formMessages.loading;
+      spinner.classList.add('spinner');
+      form.querySelector('.btn').append(spinner);
+
+      xhr.onload = function () {
+        if (xhr.status != 200) {
+          messageBox.textContent = formMessages.error;
+          console.log(`Ошибка ${xhr.status}: ${xhr.statusText}`);
+        } else {
+          messageBox.textContent = formMessages.success;
+          console.log(xhr.response);
+          form.reset();
+        }
+
+        spinner.remove();
+        form.insertAdjacentElement('afterend', messageBox);
+        setInterval(() => {
+          messageBox.remove();
+        }, 3000);
+      };
+    });
+  }
 });
 
 /***/ })
