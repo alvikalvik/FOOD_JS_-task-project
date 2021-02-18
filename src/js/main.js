@@ -448,6 +448,8 @@ window.addEventListener('DOMContentLoaded', () => {
         currentSlideIndex = slideNumber;
         showSlideNumber(currentSlideIndex);
         sliderInner.style.transform = `translateX(-${currentSlideIndex * sliderWidth}px)`;
+        sliderDots.forEach(item => item.classList.remove('dot--active'));
+        sliderDots[slideNumber].classList.add('dot--active');
     }
 
     function nextSlide() {
@@ -496,11 +498,7 @@ window.addEventListener('DOMContentLoaded', () => {
             sliderDots[i].dataset.dotindex = i;
             sliderDotsList.append(sliderDots[i]); 
 
-            sliderDots[i].addEventListener('click', () => {
-                showSlide(i);
-                sliderDots.forEach(item => item.classList.remove('dot--active'));
-                sliderDots[i].classList.add('dot--active');  
-            });
+            sliderDots[i].addEventListener('click', showSlide(i));
         }
         sliderWrapper.append(sliderDotsList);        
     }
