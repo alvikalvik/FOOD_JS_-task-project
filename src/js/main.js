@@ -39,7 +39,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     //Timer
-    const deadline = '2021-02-17T12:13';
+    const deadline = '2021-02-23T12:13';
 
     function calculateTime(endtime) { 
         const t = new Date(endtime) - new Date();
@@ -205,37 +205,91 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new MenuCard(
-        `.menu .container`,
-        `img/tabs/vegy.jpg`,
-        `vegy`,
-        `Меню "Фитнес"`,
-        `Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!`,
-        9,
-        `menu__item`
-    ).render();
+    async function getResource(url) {
+        const res = await fetch(url);
 
-    new MenuCard(
-        `.menu .container`,
-        `img/tabs/elite.jpg`,
-        `elite`,
-        `Меню “Премиум”`,
-        `В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!`,
-        19,
-        `menu__item`
-    ).render();
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
 
-    new MenuCard(
-        `.menu .container`,
-        `img/tabs/post.jpg`,
-        `post`,
-        `Меню "Постное"`,
-        `Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.`,
-        14,
-        `menu__item`
-    ).render();
+        return await res.json();             
+    }
 
-    //Form
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            for (const {img, altimg, title, descr, price} of data) {
+                new MenuCard(
+                    `.menu .container`,
+                    img,
+                    altimg,
+                    title,
+                    descr,
+                    price,
+                    `menu__item`
+                ).render();
+            }
+        })
+        .catch(error => {            
+            console.log(error);
+        });
+
+    //Form with XMLHttpRequest
+    // const forms = document.querySelectorAll('form');
+
+    // const formMessages = {
+    //     loading: 'img/form/spinner.svg',
+    //     success: 'Спасибо. Скоро мы с Вами свяжемся.',
+    //     error: 'Ошибка отправки запроса.',
+    // };
+
+    // for (const form of forms) {
+    //     sendForm(form);
+    // }
+
+    // function sendForm(form) {
+    //     form.addEventListener('submit', evt => {
+    //         evt.preventDefault();
+            
+    //         const formData = new FormData(form);
+    //         const xhr = new XMLHttpRequest();
+    //         const messageBox = document.createElement('div');
+    //         const spinner = document.createElement('img');
+
+    //         const object = {};
+    //         formData.forEach((value, key) => object[key] = value);
+    //         const json = JSON.stringify(object);
+
+    //         messageBox.classList.add('message');            
+            
+    //         xhr.open('POST', 'server.php');
+    //         xhr.setRequestHeader('Content-Type', 'application/json');
+    //         xhr.send(json);
+    //         // xhr.send(formData);  // if formData needed instead of JSON          
+            
+    //         spinner.src = formMessages.loading;
+    //         spinner.classList.add('spinner');
+    //         form.querySelector('.btn').append(spinner);
+
+    //         xhr.onload = function() {                
+    //             if (xhr.status != 200) {
+    //                 messageBox.textContent = formMessages.error;                    
+    //                 console.log(`Ошибка ${xhr.status}: ${xhr.statusText}`);
+    //             } else {
+    //                 messageBox.textContent = formMessages.success;                    
+    //                 console.log(xhr.response);
+    //                 form.reset();
+    //             }
+    //             spinner.remove();
+    //             form.insertAdjacentElement('afterend', messageBox);
+    //             setInterval(() => {
+    //                 messageBox.remove();
+    //             },3000);
+    //           };
+    //     });
+    // }
+
+
+    //Form with fetch
     const forms = document.querySelectorAll('form');
 
     const formMessages = {
@@ -245,15 +299,30 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     for (const form of forms) {
-        sendForm(form);
+        handleForm(form);
     }
 
-    function sendForm(form) {
+    async function sendFormData(url, json) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: json
+        });
+
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+
+        return await res.json();             
+    }    
+
+    function handleForm(form) {
         form.addEventListener('submit', evt => {
             evt.preventDefault();
             
-            const formData = new FormData(form);
-            const xhr = new XMLHttpRequest();
+            const formData = new FormData(form);            
             const messageBox = document.createElement('div');
             const spinner = document.createElement('img');
 
@@ -261,36 +330,195 @@ window.addEventListener('DOMContentLoaded', () => {
             formData.forEach((value, key) => object[key] = value);
             const json = JSON.stringify(object);
 
-            messageBox.classList.add('message');            
-            
-            xhr.open('POST', 'server.php');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(json);
-            // xhr.send(formData);  // if formData needed instead of JSON          
+            messageBox.classList.add('message');
             
             spinner.src = formMessages.loading;
             spinner.classList.add('spinner');
             form.querySelector('.btn').append(spinner);
+            
 
-            xhr.onload = function() {                
-                if (xhr.status != 200) {
-                    messageBox.textContent = formMessages.error;                    
-                    console.log(`Ошибка ${xhr.status}: ${xhr.statusText}`);
-                } else {
-                    messageBox.textContent = formMessages.success;                    
-                    console.log(xhr.response);
-                    form.reset();
-                }
+            sendFormData('http://localhost:3000/requests', json)
+            .then(data => {
+                messageBox.textContent = formMessages.success;                          
+                console.log(data);                
+            })
+            .catch(error => {
+                messageBox.textContent = formMessages.error;                    
+                console.log(error);
+            })
+            .finally(() => {
+                form.reset();
                 spinner.remove();
                 form.insertAdjacentElement('afterend', messageBox);
                 setInterval(() => {
                     messageBox.remove();
                 },3000);
-              };
+            });
         });
+    }    
+
+    //Slider (Simple with fade)
+
+    // const slider = document.querySelector('.offer__slider');
+    // const slides = slider.querySelectorAll('.offer__slide');
+    // const nextArrow = slider.querySelector('.offer__slider-next');
+    // const prevArrow = slider.querySelector('.offer__slider-prev');
+    // const currentSlide = slider.querySelector('#current');
+    // const totalSlides = slider.querySelector('#total');    
+
+    // function correctZero(num) {
+    //     if (num >= 0 && num < 10) {
+    //         return `0${num}`;
+    //     } else {
+    //         return num;
+    //     }
+    // }
+
+    // function showSlide(slideNumber) {
+    //     currentSlide.textContent = correctZero(slideNumber);
+    //     slides.forEach( (slide, i) => {
+    //         if ( (i + 1) === slideNumber) {
+    //             slide.classList.remove('hide');
+    //             slide.classList.add('show', 'fade');
+    //         } else {
+    //             slide.classList.add('hide');
+    //             slide.classList.remove('show', 'fade');
+    //         }
+    //     });
+    // }
+
+    // function initSlider() {
+    //     showSlide(1);
+    //     totalSlides.textContent = correctZero(slides.length);
+    //     nextArrow.addEventListener('click', nextSlide);
+    //     prevArrow.addEventListener('click', prevSlide);
+    // }
+
+    // function nextSlide() {
+    //     if (currentSlide.textContent === totalSlides.textContent) {
+    //         showSlide(1);
+    //     } else {
+    //         showSlide(+currentSlide.textContent + 1);
+    //     }        
+    // }
+
+    // function prevSlide() {
+    //     if (currentSlide.textContent === '01') {
+    //         showSlide(slides.length - 1);
+    //     } else {
+    //         showSlide(+currentSlide.textContent - 1);
+    //     }        
+    // }
+
+    // initSlider();
+
+    //Slider (Variant 2 as carousell)
+
+    const slider = document.querySelector('.offer__slider');
+    const slides = slider.querySelectorAll('.offer__slide');
+    const sliderInner = slider.querySelector('.offer__slider-inner');
+    const sliderWrapper = slider.querySelector('.offer__slider-wrapper');
+    const nextArrow = slider.querySelector('.offer__slider-next');
+    const prevArrow = slider.querySelector('.offer__slider-prev');
+    const currentSlide = slider.querySelector('#current');
+    const totalSlides = slider.querySelector('#total');  
+    const sliderDotsList = document.createElement('ul');
+    const sliderDots = [];
+    
+    let currentSlideIndex = 0;
+    let sliderWidth = 0;
+
+    function correctZero(num) {
+        if (num >= 0 && num < 10) {
+            return `0${num}`;
+        } else {
+            return num;
+        }
     }
 
+    function showSlideNumber(slideIndex) {
+        currentSlide.textContent = correctZero(slideIndex + 1);
+    }
 
+    function showTotalSlidesNumber() {
+        totalSlides.textContent = correctZero(slides.length);            
+    }
+
+    function showSlide(slideNumber) {
+        currentSlideIndex = slideNumber;
+        showSlideNumber(currentSlideIndex);
+        sliderInner.style.transform = `translateX(-${currentSlideIndex * sliderWidth}px)`;
+    }
+
+    function nextSlide() {
+        if (currentSlide.textContent === totalSlides.textContent) {
+            showSlide(0);
+        } else {
+            showSlide(+currentSlide.textContent);
+        }        
+    }
+
+    function prevSlide() {
+        if (currentSlide.textContent === '01') {
+            showSlide(slides.length - 1);
+        } else {
+            showSlide(+currentSlide.textContent - 2);
+        }        
+    }
+
+    function adjustSlidesAnsWrapperStyles() {
+        sliderWrapper.style.overflow = 'hidden';
+        sliderWrapper.style.position = 'relative';
+        sliderWidth = parseInt(window.getComputedStyle(sliderWrapper).getPropertyValue('width'));
+
+        slides.forEach( slide => {
+            slide.style.width = sliderWidth + 'px';
+        });
+        
+        sliderInner.style.cssText = `
+            width: ${slides.length * sliderWidth}px;
+            display: flex;
+            transition: transform 0.3s;
+        `;
+    }
+
+    function createSliderDots() {
+        adjustSlidesAnsWrapperStyles();
+        sliderDotsList.classList.add('carousel-indicators');        
+
+        for (let i = 0; i < slides.length; i++) {
+            sliderDots[i] = document.createElement('li');
+            sliderDots[i].classList.add('dot'); 
+            sliderDots[i].classList.remove('dot--active');
+            if (i === currentSlideIndex) {
+                sliderDots[i].classList.add('dot--active');
+            }           
+            sliderDots[i].dataset.dotindex = i;
+            sliderDotsList.append(sliderDots[i]); 
+
+            sliderDots[i].addEventListener('click', () => {
+                showSlide(i);
+                sliderDots.forEach(item => item.classList.remove('dot--active'));
+                sliderDots[i].classList.add('dot--active');  
+            });
+        }
+        sliderWrapper.append(sliderDotsList);        
+    }
+
+    function initSlider() {  
+        createSliderDots();
+        showSlide(0);
+        showTotalSlidesNumber();
+        nextArrow.addEventListener('click', nextSlide);
+        prevArrow.addEventListener('click', prevSlide);
+    }
+
+    initSlider();
+
+    
+
+
+    
 
 
 
