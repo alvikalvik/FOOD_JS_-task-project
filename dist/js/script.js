@@ -485,7 +485,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function showSlideNumber(slideIndex) {
-    currentSlide.textContent = correctZero(slideIndex + 1);
+    currentSlide.textContent = correctZero(+slideIndex + 1);
   }
 
   function showTotalSlidesNumber() {
@@ -493,7 +493,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function showSlide(slideNumber) {
-    currentSlideIndex = slideNumber;
+    currentSlideIndex = +slideNumber;
     showSlideNumber(currentSlideIndex);
     sliderInner.style.transform = `translateX(-${currentSlideIndex * sliderWidth}px)`;
     sliderDots.forEach(item => item.classList.remove('dot--active'));
@@ -545,9 +545,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
       sliderDots[i].dataset.dotindex = i;
       sliderDotsList.append(sliderDots[i]);
-      sliderDots[i].addEventListener('click', showSlide(i));
     }
 
+    sliderDots.forEach(item => {
+      item.addEventListener('click', () => {
+        showSlide(+item.dataset.dotindex);
+      });
+    });
     sliderWrapper.append(sliderDotsList);
   }
 
